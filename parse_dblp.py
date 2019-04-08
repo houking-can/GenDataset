@@ -1,10 +1,9 @@
-
-from lxml import html
 import argparse
 import os
 import time
 import json
-etree = html.etree
+from lxml import html
+from utils import readlines,iter_files
 
 class InvalidElementName(Exception):
     def __init__(self, invalid_element_name, tag_name, parent_name):
@@ -36,7 +35,7 @@ def parse_args():
 
 
 def get_elements(dtd_file) -> set:
-    dtd = etree.DTD(dtd_file)
+    dtd = html.etree.DTD(dtd_file)
     elements = set()
     for el in dtd.iterelements():
         if el.type == 'element':
@@ -50,7 +49,7 @@ def parse_xml(xml_file, elements: set):
     for each in elements:
         writers[each] = open('./dblp/'+each+'.json','a+')
 
-    context = etree.iterparse(xml_file, dtd_validation=True, events=('start', 'end'))
+    context = html.etree.iterparse(xml_file, dtd_validation=True, events=('start', 'end'))
     # turn it into an iterator
     context = iter(context)
     # get the root element
@@ -86,28 +85,6 @@ def parse_xml(xml_file, elements: set):
     root.clear()
     for each in elements:
         writers[each].close()
-
-
-
-def readlines(path):
-    with open(path, 'r') as f:
-        while True:
-            line = f.readline()
-            if line:
-                yield line
-            else:
-                break
-
-def iter_files(path):
-    """Walk through all files located under a root path."""
-    if os.path.isfile(path):
-        yield path
-    elif os.path.isdir(path):
-        for dirpath, _, filenames in os.walk(path):
-            for f in filenames:
-                yield os.path.join(dirpath, f)
-    else:
-        raise RuntimeError('Path %s is invalid' % path)
 
 
 def remove_old(path):
@@ -161,4 +138,5 @@ def parse_dblp():
 
 
 if __name__ == "__main__":
-    remove_old('./dblp')
+    # remove_old('./dblp')
+    pass
