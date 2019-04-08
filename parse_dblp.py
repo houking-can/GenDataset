@@ -1,7 +1,3 @@
-import os
-import re
-import json
-
 
 from lxml import html
 import argparse
@@ -32,9 +28,9 @@ def existing_file(filename: str) -> str:
 def parse_args():
     parser = argparse.ArgumentParser(description='Parse the DBLP XML file and convert it to CSV')
     parser.add_argument('xml_filename', action='store', type=existing_file, help='The XML file that will be parsed',
-                        metavar='xml_filename',default='dblp.xml')
+                        metavar='xml_filename',default='./dblp/dblp.xml')
     parser.add_argument('dtd_filename', action='store', type=existing_file,
-                        help='The DTD file used to parse the XML file', metavar='dtd_filename',default='dblp.dtd')
+                        help='The DTD file used to parse the XML file', metavar='dtd_filename',default='./dblp/dblp.dtd')
     parsed_args = parser.parse_args()
     return parsed_args
 
@@ -142,8 +138,6 @@ def remove_old(path):
             else:
                 cnt+=1
         print('%s  skip:%d, save %d' % (filename,cnt,i))
-
-
 
 
 def parse_dblp():
