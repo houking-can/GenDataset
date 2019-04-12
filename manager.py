@@ -34,4 +34,4 @@ def check(file,urls):
     f_pid.close()
 
 if __name__=="__main__":
-    check('pdf.txt','./url/doi.txt')
+    check('pdf.txt','./url/doi_0.txt')
