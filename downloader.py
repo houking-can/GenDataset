@@ -8,6 +8,8 @@ from copy import deepcopy
 from multiprocessing.dummy import Pool as ThreadPool
 import shutil
 import threading
+import sys
+
 
 def readlines(path):
     """ iterate file per line """
@@ -18,6 +20,7 @@ def readlines(path):
                 yield line
             else:
                 break
+
 
 def user_proxy(ip, url):
     proxy = urllib.request.ProxyHandler({'https': ip})
@@ -39,18 +42,20 @@ def user_proxy(ip, url):
 def get_proxies():
     while True:
         if over: break
-        bind_ip_url = 'your bind ip url'
+        bind_ip_url = 'http://s.zdaye.com/StApiEditIP.html?u=18811376576&p=Bit1060&api=201904102032572776&i=1'
 
-        data = urllib.request.urlopen(bind_ip_url).read()
-        print(data.decode('utf-8'))
+        urllib.request.urlopen(bind_ip_url).read()
+        # print(data.decode('utf-8'))
 
-        ip_url = 'your api url'
+        ip_url = 'http://s.zdaye.com/?api=201904102032572776&count=5&px=2'
         data = urllib.request.urlopen(ip_url).read()
         data = data.decode("utf-8")
         global new_proxy
         tmp = data.split()
+        if len(tmp) != 5:
+            print("proxy error!")
         new_proxy += tmp
-        FILE['ip'].write('\n'.join(tmp)+'\n')
+        FILE['ip'].write('\n'.join(tmp) + '\n')
         FILE['ip'].flush()
         time.sleep(10)
 
@@ -105,7 +110,6 @@ def downloader(url_path):
         start = len(open('log.txt').readlines())
     print("start at %d\n" % start)
 
-
     threads = []
     lines = readlines(url_path)
     for _ in range(start): next(lines)
@@ -144,6 +148,12 @@ if __name__ == '__main__':
     new_proxy = []
     old_proxy = []
 
+    if len(sys.argv) != 2:
+        print("Need url files")
+        exit(1)
+    if not os.path.exists(sys.argv[1]):
+        print("file not exist")
+        exit(1)
 
     FILE_LIST = ['pdf', 'skip', 'log', 'ip']
     FILE = dict()
@@ -152,11 +162,10 @@ if __name__ == '__main__':
 
     # url_path = 'url/doi.txt'
 
-
     main_pool = ThreadPool(processes=2)
     main_pool.apply_async(get_proxies)
 
-    downloader(url_path = 'url/doi_0.txt')
+    downloader(url_path=sys.argv[1])
 
     main_pool.close()
     main_pool.join()
