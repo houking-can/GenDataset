@@ -66,7 +66,7 @@ if __name__ == "__main__":
             if abs_len > 210: continue
             for sec in tmp['sections']:
                 if "introduction" in sec.lower():
-                    int_len = len(' '.join(tmp["abstract"]).split())
+                    int_len = len(' '.join(tmp["sections"][sec]).split())
                     if int_len > 1000:
                         break
                     abstract = clean_abs(tmp["abstract"])
