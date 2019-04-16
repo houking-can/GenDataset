@@ -1,13 +1,10 @@
-import sys
-import os
-import hashlib
-import subprocess
 import collections
-
-import json
-import tarfile
 import io
+import json
+import os
 import pickle as pkl
+import tarfile
+import json
 
 dm_single_close_quote = '\u2019'  # unicode
 dm_double_close_quote = '\u201d'
@@ -41,19 +38,13 @@ def write_to_tar(path, out_file, makevocab=False):
         vocab_counter = collections.Counter()
 
     with tarfile.open(out_file, 'w') as writer:
-        for idx, s in enumerate(papers):
+        for idx, file in enumerate(papers):
             if idx % 1000 == 0:
                 print("Writing paper {} of {}; {:.2f} percent done".format(
-                    idx, num_stories, float(idx) * 100.0 / float(num_papers)))
-
-            article_sents, abstract_sents = get_art_abs(story_file)
-
-            # Write to JSON file
-            js_example = {}
-            js_example['id'] = s.replace('.story', '')
-            js_example['article'] = article_sents
-            js_example['abstract'] = abstract_sents
-            js_serialized = json.dumps(js_example, indent=4).encode()
+                    idx, num_papers, float(idx) * 100.0 / float(num_papers)))
+            paper = json.load(open(file))
+            paper["id"]=os.path.basename(file).replace('.json','')
+            js_serialized = json.dumps(paper, indent=4).encode()
             save_file = io.BytesIO(js_serialized)
             tar_info = tarfile.TarInfo('{}/{}.json'.format(
                 os.path.basename(out_file).replace('.tar', ''), idx))
@@ -62,8 +53,8 @@ def write_to_tar(path, out_file, makevocab=False):
 
             # Write the vocab to file, if applicable
             if makevocab:
-                art_tokens = ' '.join(article_sents).split()
-                abs_tokens = ' '.join(abstract_sents).split()
+                art_tokens = ' '.join(paper['article']).split()
+                abs_tokens = ' '.join(paper['abstract']).split()
                 tokens = art_tokens + abs_tokens
                 tokens = [t.strip() for t in tokens]  # strip
                 tokens = [t for t in tokens if t != ""]  # remove empty
@@ -81,12 +72,12 @@ def write_to_tar(path, out_file, makevocab=False):
 
 
 if __name__ == '__main__':
-    root_dir = r'F:\Dataset\json_v'
+    root_dir = r'F:\EMNLP'
     all_train = "%s/train" % root_dir
     all_val = "%s/val" % root_dir
     all_test = "%s/test" % root_dir
 
-    finished_files_dir = "finished_files"
+    finished_files_dir = r"F:\EMNLP"
 
     # Create some new directories
     if not os.path.exists(finished_files_dir):

@@ -1,9 +1,11 @@
 import os
 import json
 import shutil
-import threading
+import random
 from nltk.tokenize import sent_tokenize
 import re
+from os.path import exists,join
+from segtok.segmenter import split_multi
 
 def iter_files(path):
     """Walk through all files located under a root path."""
@@ -25,7 +27,7 @@ def clean_abs(sents):
         sent = sent.lower()
         if "keywords:" in sent:
             continue
-        sent = sent.replace(';', ' . ')
+        # sent = sent.replace(';', ' . ')
         sent = re.sub('[~|\'|\"|``|\t|\n|-]', ' ', sent)
         sent = re.sub('{.*}', ' @cite ', sent)
         res.append(' '.join(sent.split()))
@@ -37,26 +39,89 @@ def clean_int(sents):
     paragraph = []
     for sent in sents:
         sent = sent.lower()
-        sent = sent.replace(';', ' . ')
+
         sent = re.sub('[~|\'|\"|``|\t|\n|-]', ' ', sent)
-        sent = re.sub('{.*}', ' @cite ', sent)
-        tmp = sent_tokenize(sent)
+        sent = re.sub('{.*}', ' @cite', sent)
+        sent = re.sub('\(.*\)',' @remark',sent)
+        sent = re.sub('\[.*\]', ' @cite', sent)
+
+        sent = re.sub('e\s*\.g\s*\.\s*,', ' e.g., ', sent)
+        sent = re.sub('e\s*\.g\s*\.\s*', ' e.g., ', sent)
+        sent = re.sub('etc\s*\.', ' etc. ', sent)
+        sent = re.sub('et\s*al\s*\.\s*,', ' et al., ', sent)
+        sent = re.sub('i\s*\.e\s*\.\s*,', ' i.e., ', sent)
+        sent = re.sub('[;|:]', '. ', sent)
+        sent = re.sub(',[\s|,]*,', ', ', sent)
+        sent = re.sub('\s*\.\s*', '. ',sent)
+
+        tmp = split_multi(sent)
+
         res = []
+
         for each in tmp:
+            if 'i.e' not in each and 'e.g' not in each:
+                x = sent_tokenize(each)
+                for y in x:
+                    y = y.split()
+                    if len(y) < 5: continue
+                    y = ' '.join(y)
+                    res.append(y)
+                continue
             each = each.split()
             if len(each)<5:continue
             each = ' '.join(each)
+
             res.append(each)
         paragraph.append(len(res))
         introduction.extend(res)
     return introduction, paragraph
 
 
-if __name__ == "__main__":
+def clean_con(sents):
+    conclusion = []
 
+    for sent in sents[:3]:
+        sent = sent.lower()
+        sent = re.sub('[~|\'|\"|``|\t|\n|-]', ' ', sent)
+        sent = re.sub('{.*}', ' @cite', sent)
+        sent = re.sub('\(.*\)', ' @remark', sent)
+        sent = re.sub('\[.*\]', ' @cite', sent)
+
+        sent = re.sub('e\s*\.g\s*\.\s*,', ' e.g., ', sent)
+        sent = re.sub('e\s*\.g\s*\.\s*', ' e.g., ', sent)
+        sent = re.sub('etc\s*\.', ' etc. ', sent)
+        sent = re.sub('et\s*al\s*\.\s*,', ' et al., ', sent)
+        sent = re.sub('i\s*\.e\s*\.\s*,', ' i.e., ', sent)
+        sent = re.sub('[;|:]', '. ', sent)
+        sent = re.sub(',[\s|,]*,', ', ', sent)
+        sent = re.sub('\s*\.\s*', '. ', sent)
+
+        tmp = split_multi(sent)
+
+        res = []
+
+        for each in tmp:
+            if 'i.e' not in each and 'e.g' not in each:
+                x = sent_tokenize(each)
+                for y in x:
+                    y = y.split()
+                    if len(y) < 5: continue
+                    y = ' '.join(y)
+                    res.append(y)
+                continue
+            each = each.split()
+            if len(each)<5:continue
+            each = ' '.join(each)
+
+            res.append(each)
+
+        conclusion.extend(res)
+    return conclusion, len(conclusion)
+
+def extract_json(src,des):
     i = 1
-    files = iter_files(r'F:\Dataset\json_v1')
-    des = r"F:\emnlp"
+    files = iter_files(src)
+
     for id, file in enumerate(files):
         print(file)
         tmp = json.load(open(file))['paper']
@@ -64,16 +129,54 @@ if __name__ == "__main__":
         if "abstract" in tmp:
             abs_len = len(' '.join(tmp["abstract"]).split())
             if abs_len > 210: continue
+            flag = False
             for sec in tmp['sections']:
                 if "introduction" in sec.lower():
                     int_len = len(' '.join(tmp["sections"][sec]).split())
-                    if int_len > 1000:
-                        break
+                    # if int_len > 1000:
+                    #     continue
                     abstract = clean_abs(tmp["abstract"])
                     introduction, paragraph = clean_int(tmp["sections"][sec])
+                    flag = True
+
+                if "conclusion" in sec.lower() and flag:
+                    conclusion, con_len = clean_con(tmp["sections"][sec])
                     paper["abstract"] = abstract
-                    paper["introduction"] = introduction
+                    paper["article"] = introduction+conclusion
+                    paragraph.append(con_len)
                     paper["paragraph"] = paragraph
+
+
                     json.dump(paper, open(os.path.join(des, "%d.json" % i), 'w'))
                     i += 1
-        print(i)
+    print(i)
+def split(src,ratio=0.94):
+    files = list(iter_files(src))
+    random.shuffle(files)
+    len_train = int(len(files)*ratio)
+    len_val =  int(len(files)*(1-ratio)/2)
+    len_test = len(files)-len_train-len_val
+    train = files[:len_train]
+    val = files[len_train:len_train+len_val]
+    test = files[-len_test:]
+
+    if not exists(join(src,'train')):os.makedirs(join(src,'train'))
+    if not exists(join(src, 'test')): os.makedirs(join(src, 'test'))
+    if not exists(join(src, 'val')): os.makedirs(join(src, 'val'))
+    for each in train:
+        shutil.move(each,join(src,'train'))
+    for each in test:
+        shutil.move(each,join(src,'test'))
+    for each in val:
+        shutil.move(each,join(src,'val'))
+
+if __name__ == "__main__":
+    path = r'F:\Dataset\json_v1'
+    des = r"F:\EMNLP"
+    if not exists(des):
+        os.makedirs(des)
+
+    extract_json(path,des)
+    split(des)
+
+
