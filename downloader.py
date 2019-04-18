@@ -3,7 +3,6 @@ import re
 import time
 import urllib.parse
 import urllib.request
-import urllib.request
 from copy import deepcopy
 from multiprocessing.dummy import Pool as ThreadPool
 import shutil
