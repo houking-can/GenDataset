@@ -8,7 +8,7 @@ import re
 import json
 import traceback
 import threading
-
+from make_datafiles_conference import extract_json,split
 
 def iter_files(path):
     """Walk through all files located under a root path."""
@@ -132,7 +132,8 @@ def extract(id, file):
             # if len(p.text.split())<3:
             #     continue
             tmp += p.text + ' '
-        article = tmp
+        if tmp!='':
+            article = tmp
         # tmp = re.findall('%s(.*)%s' % (INT, INT_END), body)
         # if len(tmp) != 0: article = tmp[0]
     if CON and CON_END_text:
@@ -142,7 +143,9 @@ def extract(id, file):
 
     yes = True
     if abstract and article:
-        if len(article.split()) < 1000 and len(conclusion.split()) < 800:
+        if len(article.split()) < 1000:
+            if conclusion and len(conclusion.split()) > 800:
+                conclusion=''
             json.dump({"abstract": abstract,
                        "article": article,
                        "conclusion": conclusion,
@@ -159,36 +162,66 @@ def delete_skip(path):
 
 if __name__ == "__main__":
 
-    # path = 'E:\\HTML\\ICML'
-    save_root = 'E:\\JSON'
-    root_path = r'E:\HTML\NEW'
+    # # path = 'E:\\HTML\\ICML'
+    # save_root = 'E:\\JSON'
+    # root_path = r'E:\HTML\conference'
+    #
+    # global save_path
+    # for path in os.listdir(root_path):
+    #     path = os.path.join(root_path, path)
+    #     print(path)
+    #
+    #     save_path = os.path.join(save_root, basename(path))
+    #     if not os.path.exists(save_path):
+    #         os.makedirs(save_path)
+    #
+    #     start = len(os.listdir(save_path))
+    #     print("start with %d" % start)
+    #     files = list(iter_files(path))
+    #     start_time = time.time()
+    #     threads = []
+    #     for i in tqdm(range(start, len(files))):
+    #         # if time.time() - start_time > 5:
+    #         #     for thread in threads:
+    #         #         thread.join()
+    #         #     threads = []
+    #         #     start_time = time.time()
+    #         # thread = threading.Thread(target=extract, args=(i,files[i]))
+    #         # thread.start()
+    #         # threads.append(thread)
+    #         extract(i,files[i])
+    #
+    #     for thread in threads:
+    #         thread.join()
+    #
+    # delete_skip(save_root)
+    #
+    # d_path = r'E:\JSON\ACL'
+    # files = iter_files(d_path)
+    # for id, file in enumerate(files):
+    #     if file.endswith('.json'):
+    #         tmp = json.load(open(file))
+    #         abstract = tmp["abstract"]
+    #         if "title and abstract" in abstract.lower():
+    #             abstract = re.sub("title and abstract.*$", '', abstract, flags=re.I)
+    #             tmp["abstract"] = abstract
+    #             json.dump(tmp, open(file, 'w'), indent=4)
+    #             print(file)
+    #
+    # path = r'E:\JSON'
+    # des = r"E:\conference"
+    # if not os.path.exists(des):
+    #     os.makedirs(des)
+    # extract_json(path, des)
+    #
+    # path = r'E:\conference'
+    # for file in iter_files(path):
+    #     paper = json.load(open(file))
+    #     a = len(' '.join(paper['abstract']))
+    #     b = len(' '.join(paper['article']))
+    #     c = len(' '.join(paper['conclusion']))
+    #     if a > c + b + 50:
+    #         shutil.move(file, r'E:\tmp\conference')
+    #         print(file)
 
-    global save_path
-    for path in os.listdir(root_path):
-        path = os.path.join(root_path, path)
-        print(path)
-
-        save_path = os.path.join(save_root, basename(path))
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
-
-        start = len(os.listdir(save_path))
-        print("start with %d" % start)
-        files = list(iter_files(path))
-        start_time = time.time()
-        threads = []
-        for i in tqdm(range(start, len(files))):
-            # if time.time() - start_time > 20:
-            #     for thread in threads:
-            #         thread.join()
-            #     threads = []
-            #     start_time = time.time()
-            # thread = threading.Thread(target=extract, args=(i,files[i]))
-            # thread.start()
-            # threads.append(thread)
-            extract(i,files[i])
-
-        for thread in threads:
-            thread.join()
-
-    delete_skip(save_root)
+    split(r'E:\conference')

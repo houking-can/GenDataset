@@ -5,7 +5,6 @@ import random
 from nltk.tokenize import sent_tokenize
 import re
 from os.path import exists,join
-from segtok.segmenter import split_multi
 
 
 def iter_files(path):
@@ -25,6 +24,7 @@ def clean_abs(sent):
     sent = sent.strip()
     sent = sent.lower()
     sent = re.sub('[~|\'|\"|``|\t|\n]', ' ', sent)
+    sent = re.sub('-\s+','',sent)
     sent = sent_tokenize(sent)
     res = []
     for each in sent:
@@ -43,7 +43,7 @@ def clean_text(sent):
     sent = re.sub('\(.*et\s*al.*\)', ' @cite', sent)
     sent = re.sub('\[.*\]', ' @cite', sent)
     sent = re.sub('\(.*\d{4}.*\)', ' @cite', sent)
-
+    sent = re.sub('-\s+', '', sent)
 
     sent = re.sub('e\s*\.g\s*\.\s*,', ' e.g., ', sent)
     sent = re.sub('e\s*\.g\s*\.\s*', ' e.g., ', sent)
@@ -53,11 +53,14 @@ def clean_text(sent):
     sent = re.sub('[;|:]', '. ', sent)
     sent = re.sub(',[\s|,]*,', ', ', sent)
     sent = re.sub('\s*\.\s*', '. ', sent)
-
+    res = []
     sent = sent_tokenize(sent)
+    for each in sent:
+        if len(each.split())<4:
+            continue
+        res.append(each)
 
-
-    return list(sent)
+    return res
 
 
 def extract_json(src,des):
@@ -68,18 +71,23 @@ def extract_json(src,des):
         print("%d/%d" % (id,length))
         paper = json.load(open(file))
 
+        a = len(paper['abstract'].split())
+        b = len(paper['article'].split())
+        if a > b:
+            continue
+
         abs_len = len(paper["abstract"].split())
         if abs_len > 210: continue
-
-        # int_len = len(' '.join(paper["article"]).split())
-        # if int_len > 1000:continue
 
         abstract = clean_abs(paper['abstract'])
         if len(abstract)<2:continue
         article = clean_text(paper["article"])
         if len(article)<2:continue
 
+
         conclusion = clean_text(paper["conclusion"])
+
+
         paper["abstract"] = abstract
         paper["article"] = article
         paper["conclusion"] = conclusion

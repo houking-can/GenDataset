@@ -72,12 +72,12 @@ def write_to_tar(path, out_file, makevocab=False):
 
 
 if __name__ == '__main__':
-    root_dir = r'F:\EMNLP'
+    root_dir = r'E:\conference'
     all_train = "%s/train" % root_dir
     all_val = "%s/val" % root_dir
     all_test = "%s/test" % root_dir
 
-    finished_files_dir = r"F:\EMNLP"
+    finished_files_dir = r"E:\conference"
 
     # Create some new directories
     if not os.path.exists(finished_files_dir):

@@ -15,15 +15,15 @@ def iter_files(path):
         raise RuntimeError('Path %s is invalid' % path)
 
 
-path = r'F:\EMNLP\test'
-files = iter_files(path)
-for id, file in enumerate(files):
-    paper = json.load(open(file))
-    abstract = paper['abstract']
-    article = paper['article']
-    if len(abstract) < 2 or len(article) < 2:
-        print(file)
-        os.remove(file)
+path = r'E:\conference\val'
+# files = iter_files(path)
+# for id, file in enumerate(files):
+#     paper = json.load(open(file))
+#     abstract = paper['abstract']
+#     article = paper['article']
+#     if len(abstract) < 2 or len(article) < 2:
+#         print(file)
+#         os.remove(file)
 
 files = iter_files(path)
 for id, file in enumerate(files):

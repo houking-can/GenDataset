@@ -58,7 +58,7 @@ def extract(file):
 
 if __name__ == "__main__":
 
-    path = r'E:\HTML\ACL'
+    path = r'E:\HTML\AAAI_1'
     save_root = r'E:\HTML\NO'
     global save_path
     save_path = os.path.join(save_root, basename(path))
