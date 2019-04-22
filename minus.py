@@ -57,8 +57,8 @@ def minus(src,des):
         except Exception as e:
             print(e)
 
-src_path = r'E:\HTML\CVPR'
-des_path = r'E:\PDF\CVPR'
+src_path = r'C:\Users\Houking\Desktop\introduction\decoded'
+des_path = r'C:\Users\Houking\Desktop\baseline\decoded'
 src_path +='\\'
 des_path+='\\'
 minus(src_path,des_path)

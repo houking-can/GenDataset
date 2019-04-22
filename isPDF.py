@@ -22,7 +22,7 @@ def iter_files(path):
 
 
 des_path = r'E:\PDF\tmp'
-sou_path = r'E:\PDF\ICCV'
+sou_path = r'E:\PDF\IJCAI'
 
 for id, file in  enumerate(iter_files(sou_path)):
     if not isValidPDF(file):
