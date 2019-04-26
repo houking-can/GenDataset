@@ -1,21 +1,20 @@
 import os
 import shutil
 import json
+from utils import iter_files
 
 
-def iter_files(path):
-    """Walk through all files located under a root path."""
-    if os.path.isfile(path):
-        yield path
-    elif os.path.isdir(path):
-        for dirpath, _, filenames in os.walk(path):
-            for f in filenames:
-                yield os.path.join(dirpath, f)
-    else:
-        raise RuntimeError('Path %s is invalid' % path)
 
 
-path = r'E:\conference\val'
+path = r'/home/yhj/dataset/emnlp/val'
+# for dir in os.listdir(path):
+#     tmp_dir = os.path.join(path,dir)
+#     for i,file in enumerate(iter_files(tmp_dir)):
+#         shutil.move(file,os.path.join(tmp_dir,"%s-%d.html" % (dir,i)))
+
+
+# save_path = r'/home/yhj/dataset/emnlp'
+# start = len(os.listdir(save_path))
 # files = iter_files(path)
 # for id, file in enumerate(files):
 #     paper = json.load(open(file))
@@ -25,10 +24,12 @@ path = r'E:\conference\val'
 #         print(file)
 #         os.remove(file)
 
-files = iter_files(path)
-for id, file in enumerate(files):
-    shutil.move(file, os.path.join(path, "(%d).json" % id))
+# files = iter_files(path)
+# for id, file in enumerate(files):
+#     # id = id + start
+#     shutil.move(file, os.path.join(path, "(%d).json" % id))
 
-files = iter_files(path)
-for id, file in enumerate(files):
-    shutil.move(file, os.path.join(path, "%d.json" % id))
+# files = iter_files(path)
+# for id, file in enumerate(files):
+#     # id = id + start
+#     shutil.move(file, os.path.join(path, "%d.json" % id))

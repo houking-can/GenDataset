@@ -1,7 +1,7 @@
 import os
 import json
 
-path = r'F:\EMNLP\train'
+path = r'/home/yhj/dataset/emnlp/train'
 
 
 def iter_files(path):
